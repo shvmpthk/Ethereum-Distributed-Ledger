@@ -1,0 +1,1 @@
+geth --identity "fm_surat" --datadir InterFarm --networkid 1001 --nodiscover --rpc --rpcport 9093 --rpccorsdomain "*" --rpcapi "eth,web3,personal,admin,miner" --port 30903 --ipcpath InterFarm/geth/geth.ipc

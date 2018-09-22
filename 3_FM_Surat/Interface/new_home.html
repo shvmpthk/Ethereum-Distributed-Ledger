@@ -1,0 +1,888 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- <link rel="shortcut icon" href="your_image_path_and_name.ico" /> -->
+    <title>Home</title>
+    <script src="web3.min.js"></script>
+    <script src="mqtt.js"></script>
+    <script type="text/javascript">
+      //MQTT
+      var client  = mqtt.connect('ws://127.0.0.1:9001')
+
+      client.on('connect', function () {
+        client.subscribe('SURS1/Data')
+        client.subscribe('SURS2/Data')
+        //client.publish('MUMS1/Data', 'Hello mqtt')
+      })
+
+      client.on('message', function (topic, message) {
+        // message is Buffer
+        //console.log(message.toString())
+        if (topic == 'SURS1/Data'){
+          document.getElementById("sensor1-data").innerHTML = message.toString();
+        }
+        else {
+          document.getElementById("sensor2-data").innerHTML = message.toString();
+        }
+        //client.end()
+      })
+
+      //host
+        if(localStorage.getItem('host') === null) {
+          alert("Host not Configured");
+        }
+        else{
+          var host = localStorage.getItem('host');
+          var port = localStorage.getItem('port');
+        }
+
+        //Intra-Farm Account
+        web3_intra = new Web3(new Web3.providers.HttpProvider("http://"+host+":"+8061));
+        web3_intra.eth.defaultAccount = web3_intra.eth.accounts[0];
+        //Sensor nodes
+        web3_1 = new Web3(new Web3.providers.HttpProvider("http://"+host+":"+8062));
+        //web3_2 = new Web3(new Web3.providers.HttpProvider("http://"+host+":"+8063));
+        //Farm Contract
+        var farmContractABI = new web3_intra.eth.contract([{"constant":true,"inputs":[{"name":"addr","type":"address"},{"name":"index","type":"uint256"}],"name":"getSensorDataInfo","outputs":[{"name":"","type":"bytes32"},{"name":"","type":"uint256"},{"name":"","type":"bytes32"},{"name":"","type":"uint256"},{"name":"","type":"bytes32"},{"name":"","type":"uint256"},{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"addr","type":"address"},{"name":"data_id","type":"bytes32"}],"name":"paySensorForData","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":false,"inputs":[{"name":"addr","type":"address"},{"name":"data_id","type":"bytes32"}],"name":"putOutToSell","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"data_id","type":"bytes32"},{"name":"dataPoints","type":"uint256"},{"name":"dataHash","type":"bytes32"},{"name":"timestamp","type":"uint256"},{"name":"location","type":"bytes32"},{"name":"addr","type":"address"}],"name":"sendSensorDataTo","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"addr","type":"address"},{"name":"data_id","type":"bytes32"}],"name":"getSensorDataInfoById","outputs":[{"name":"","type":"bytes32"},{"name":"","type":"uint256"},{"name":"","type":"bytes32"},{"name":"","type":"uint256"},{"name":"","type":"bytes32"},{"name":"","type":"uint256"},{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"addr","type":"address"}],"name":"getSensorDataCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}]);
+        var farmContractAddress = "0x5da4aebdbd28dfdc9b197938a591efd8f8b97659";
+        var farmContract = farmContractABI.at(farmContractAddress);
+
+        console.log(farmContract);
+
+        //Inter-Farm Account
+        web3_inter = new Web3(new Web3.providers.HttpProvider("http://"+host+":"+9093));
+        web3_inter.eth.defaultAccount = web3_inter.eth.accounts[0];
+        //Bidding Contract
+        var bidContractABI = new web3_inter.eth.contract([{"constant":true,"inputs":[{"name":"data_id","type":"bytes32"}],"name":"getHighestBid","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"data_id","type":"bytes32"}],"name":"closeBid","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"addr","type":"address"},{"name":"index","type":"uint256"}],"name":"getDataDetails","outputs":[{"name":"","type":"bytes32"},{"name":"","type":"address"},{"name":"","type":"bytes32"},{"name":"","type":"bytes32"},{"name":"","type":"uint256"},{"name":"","type":"uint256"},{"name":"","type":"address"},{"name":"","type":"address"},{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"data_id","type":"bytes32"}],"name":"getDataDetailsById","outputs":[{"name":"","type":"bytes32"},{"name":"","type":"address"},{"name":"","type":"bytes32"},{"name":"","type":"bytes32"},{"name":"","type":"uint256"},{"name":"","type":"uint256"},{"name":"","type":"address"},{"name":"","type":"address"},{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"data_id","type":"bytes32"}],"name":"bid","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":true,"inputs":[{"name":"addr","type":"address"}],"name":"countData","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"data_id","type":"bytes32"}],"name":"whoOwns","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"data_id","type":"bytes32"},{"name":"sensor_addr","type":"address"},{"name":"dataPoints","type":"uint256"},{"name":"dataHash","type":"bytes32"},{"name":"timestamp","type":"uint256"},{"name":"location","type":"bytes32"}],"name":"addNewData","outputs":[],"payable":true,"stateMutability":"payable","type":"function"}]);
+        var bidContractAddress = "0xbd6b52599cd6c174e1b907fcd0f364803bcb0760";
+        var bidContract = bidContractABI.at(bidContractAddress);
+
+        console.log(bidContract);
+
+    </script>
+    <style>
+      body{
+        background: url(IoTLive.jpg) no-repeat fixed;/*IoT_LiveWorx.jpg); /**/
+        color: white;
+        background-size: cover;
+      }
+      #wrap{
+        width:47%;/*width:300px;*/
+        height: auto;
+        /*background-color: rgba(255, 255, 255, 0.9);*/
+        padding: 12px;
+        float: left;
+        margin-left: 4px;
+        margin-top: 4px;
+        background-color: rgba(0,0,0,0.8);
+        border: 5px solid white;
+      }
+      #wrap button, #ubid{
+        margin: 0 30%;
+        width: 34%;
+        height: 40%;
+        padding: 10px;
+        display: inline-block;
+        background-color: rgba(192, 57, 43,1.0);
+        border: none;
+        color: white;
+        font-size: 16px;
+      }
+      h2{
+        width: 98%;
+        height: 36px;
+        margin:0;
+        padding: 5px;
+        /*background-color: rgba(44, 62, 80,1.0);*/
+        background-color: #16a085;
+        color: white;
+        text-align: center;
+        border-radius: 5px;
+      }
+      table{
+        width: 100%;
+      }
+      #wrap td{
+        padding: 2px 10px;
+        color: #ecf0f1;
+        /*color: rgba(44, 62, 80,1.0);rgba(211, 84, 0,1.0);*/
+      }
+      tr{
+        margin: 2px;
+      }
+      button:hover{
+        cursor: pointer;
+      }
+      .header{
+        border: 1px solid white;
+        padding: 12px;
+        color: white;
+        background-color: rgba(0,0,0,0.8);
+      }
+      h1{
+        display: inline-block;
+        color: white;
+      }
+      .myinfo{
+        margin: 14px 20px 0 0;
+      }
+      /* The Modal (background) */
+      .modal {
+          display: none; /* Hidden by default */
+          position: fixed; /* Stay in place */
+          z-index: 1; /* Sit on top */
+          padding-top: 150px; /* Location of the box */
+          left: 0;
+          top: 0;
+          width: 100%; /* Full width */
+          height: 100%; /* Full height */
+          overflow: auto; /* Enable scroll if needed */
+          background-color: rgb(0,0,0); /* Fallback color */
+          background-color: rgba(0,0,0,0.7); /* Black w/ opacity */
+          color: black;
+      }
+
+      /* Modal Content */
+      .modal-content {
+          background-color: #fefefe;
+          margin: 0 auto;
+          padding: 20px;
+          border: 1px solid #888;
+          width: 60%;
+          /*display: table;*/
+      }
+
+      /* The Close Button */
+      .close {
+          color: #aaaaaa;
+          float: right;
+          font-size: 28px;
+          font-weight: bold;
+      }
+
+      .close:hover,
+      .close:focus {
+          color: #000;
+          text-decoration: none;
+          cursor: pointer;
+      }
+      h3{
+        color: #c0392b;
+      }
+      input[type=text] {
+        box-sizing: border-box;
+        padding: 6px 5px;
+        margin: 1px 0;
+        border: none;
+        border-bottom: 2px solid #013243;
+
+      }
+      .nav{
+        padding: 10px;
+        background-color: white;//rgba(0,0,0,0.7);
+        margin: 0px;
+        font-size: 16px;
+      }
+      .nav-opt{
+        text-decoration: none;
+        display:inline-block;
+        margin: 0px;
+        padding:10px;
+        height: 100%;
+        background-color: rgba(192, 57, 43,1.0);//#c0392b;//#013243;
+        color: white;
+        border: none;
+      }
+      .extra_buttons{
+        text-decoration: none;
+        padding:5px 10px;
+        background-color: #013243;
+        color: white;
+      }
+      #profile-btn {
+        background-color: #013243;
+      }
+      #profile{
+        display: block;
+        /*width:100%;*/
+        height: auto;
+        /*background-color: rgba(255, 255, 255, 0.9);*/
+        padding: 12px;
+        margin: 3px 0;
+        background-color: rgba(0,0,0,0.8);
+        border: 5px solid white;
+      }
+      #sensors{
+        display: none;
+      }
+      #ext-sensors{
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>Trading On Blockchain</h1>
+      <!-- <button type="button" id="logout">Log Out</button> -->
+      <div class="myinfo" style="float:right;display:inline-block">
+        <table style="display:inline-block">
+          <tr>
+            <td>My Address : </td><td id="myaddr">User_addr</td>
+          </tr>
+          <tr>
+            <td>My Balance : </td><td id="mybal">User_bal</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="nav">
+      <button class="nav-opt" id="profile-btn" onclick="getProfile()"> Portfolio </button>
+      <button class="nav-opt" id="sensors-btn" onclick="getSensors()"> Sensor Farm </button>
+      <button class="nav-opt" id="ext-sensors-btn" onclick="getOtherSensors()"> Bidding Space </button>
+    </div>
+
+    <script type="text/javascript">
+
+      function getProfile(){
+        var sensors = document.getElementById("sensors");
+        var profile = document.getElementById("profile");
+	      var ext_sensors = document.getElementById("ext-sensors");
+        sensors.style.display = "none";
+        document.getElementById("sensors-btn").style.backgroundColor = "#c0392b";
+	      ext_sensors.style.display = "none";
+        document.getElementById("ext-sensors-btn").style.backgroundColor = "#c0392b";
+        profile.style.display = "block";
+        document.getElementById("profile-btn").style.backgroundColor = "#013243";
+      }
+
+      function getSensors(){
+        var sensors = document.getElementById("sensors");
+        var profile = document.getElementById("profile");
+	      var ext_sensors = document.getElementById("ext-sensors");
+	      profile.style.display = "none";
+        document.getElementById("profile-btn").style.backgroundColor = "#c0392b";
+	      ext_sensors.style.display = "none";
+        document.getElementById("ext-sensors-btn").style.backgroundColor = "#c0392b";
+        sensors.style.display = "block";
+        document.getElementById("sensors-btn").style.backgroundColor = "#013243";
+      }
+
+      function getOtherSensors(){
+        var sensors = document.getElementById("sensors");
+        var profile = document.getElementById("profile");
+	      var ext_sensors = document.getElementById("ext-sensors");
+	      profile.style.display = "none";
+        document.getElementById("profile-btn").style.backgroundColor = "#c0392b";
+	      sensors.style.display = "none";
+        document.getElementById("sensors-btn").style.backgroundColor = "#c0392b";
+	      ext_sensors.style.display = "block";
+        document.getElementById("ext-sensors-btn").style.backgroundColor = "#013243";
+      }
+
+    </script>
+
+    <div id="profile">
+        <br /><input type="text" id="which" placeholder="Enter Data Id"></input>
+        <button class="extra_buttons" id="whoowns">Check Owner</button>
+
+        <br><br><span> Miner Status : </span>
+        <script type="text/javascript">
+          if(web3_intra.eth.mining) {
+            document.write("Mining...");
+          }
+          else {
+            document.write("Not Mining !");
+          }
+        </script>
+        <br><br>
+
+        <fieldset style="border:3px solid; color:black; background-color:white">
+        <legend style="color:white; background-color:orange">In Farm Data</legend>
+        <table style="border: 1px solid white;text-align:center;" id = "dataTable">
+        <tr><th>Data_ID</th><th>DataPoints</th><th>Timestamp</th><th>Hash</th><th>location</th><th>Traded</th></tr><tr></tr><tr></tr>
+
+        <script type="text/javascript">
+        {
+        //sensor node 1
+          let sensorAddress = web3_1.eth.accounts[0];
+          let countdata = farmContract.getSensorDataCount.getData(sensorAddress);
+          web3_intra.eth.call({to: farmContractAddress,data: countdata},function(err,res){
+            if(!err) {
+              countn = res;
+              console.log(countn);
+              for(var i=0;i<countn;i++){
+                console.log("Count: " +i);
+                dataDetails = farmContract.getSensorDataInfo.getData(sensorAddress,i);
+                web3_intra.eth.call({to: farmContractAddress,data: dataDetails},function(err,res){
+                  if(!err) {
+                    var res = res.replace(/^0x/, '');
+                    console.log("Res : "+res);
+                    var new_res = res.match(/.{1,64}/g);
+                    console.log(new_res);
+                    var new_row = document.createElement('tr');
+                    new_row.insertCell(0).innerHTML = web3_inter.toAscii(new_res[0]);
+                    new_row.insertCell(1).innerHTML = web3_inter.toDecimal("0x"+new_res[1]);
+                    //var date = new Date(parseInt("0x"+new_res[4])*1000);
+                    new_row.insertCell(2).innerHTML = (new Date(parseInt("0x"+new_res[3])*1000)).toLocaleString();
+                    new_row.insertCell(3).innerHTML = new_res[2];
+                    new_row.insertCell(4).innerHTML = web3_inter.toAscii(new_res[4]);
+                    new_row.insertCell(5).innerHTML = (new_res[6]==0)?"No":"Yes";     //web3_intra.toDecimal()
+                    document.getElementById("dataTable").appendChild(new_row);
+                  }
+                  else
+                    console.log(err);
+                });
+              }
+            }
+            else console.log(err);
+          });
+        }
+        /*{
+          //sensor node 2
+            let sensorAddress = web3_2.eth.accounts[0];
+            let countdata = farmContract.getSensorDataCount.getData(sensorAddress);
+            web3_intra.eth.call({to: farmContractAddress,data: countdata},function(err,res){
+              if(!err) {
+                countn = res;
+                console.log(countn);
+                for(var i=0;i<countn;i++){
+                  console.log("Count: " +i);
+                  dataDetails = farmContract.getSensorDataInfo.getData(sensorAddress,i);
+                  web3_intra.eth.call({to: farmContractAddress,data: dataDetails},function(err,res){
+                    if(!err) {
+                      var res = res.replace(/^0x/, '');
+                      console.log("Res : "+res);
+                      var new_res = res.match(/.{1,64}/g);
+                      console.log(new_res);
+                      var new_row = document.createElement('tr');
+                      new_row.insertCell(0).innerHTML = web3_inter.toAscii(new_res[0]);
+                      new_row.insertCell(1).innerHTML = web3_inter.toDecimal("0x"+new_res[1]);
+                      //var date = new Date(parseInt("0x"+new_res[4])*1000);
+                      new_row.insertCell(2).innerHTML = (new Date(parseInt("0x"+new_res[3])*1000)).toLocaleString();
+                      new_row.insertCell(3).innerHTML = new_res[2];
+                      new_row.insertCell(4).innerHTML = web3_inter.toAscii(new_res[4]);
+                      new_row.insertCell(5).innerHTML = (new_res[6]==0)?"No":"Yes";
+                      document.getElementById("dataTable").appendChild(new_row);
+                    }
+                    else
+                      console.log(err);
+                  });
+                }
+              }
+              else console.log(err);
+            });
+        }*/
+        </script>
+        </table>
+        <br /><hr />
+        <input type="text" id="transfer-id" placeholder="Enter Data Id"></input>
+        &nbsp
+        <button class="extra_buttons" id="transfer-data"> Put for Bidding </button>
+
+      </fieldset><br />
+
+      <fieldset style="border:3px solid; color:black; background-color:white">
+        <legend style="color:white; background-color:orange"> Data put up for Bidding </legend>
+        <table style="border: 1px solid white;text-align:center;" id = "CloseBiddingdataTable">
+        <tr><th>Data_ID</th><th>Location</th><th>Bid</th><th>Timestamp</th><th>Bidder</th><th>BidOpen</th></tr><tr></tr>
+
+        <script>
+          {
+             let countdata = bidContract.countData.getData(web3_inter.eth.accounts[0]);
+             web3_inter.eth.call({to: bidContractAddress, data: countdata},function(err,res){
+               if(!err) {
+                 let countn = res;
+                 //console.log(countn);
+                 for(let i=0;i<countn;i++){
+                   //console.log("Count: " +i);
+                   let globaldataDetails = bidContract.getDataDetails.getData(web3_inter.eth.accounts[0],i);
+                   web3_inter.eth.call({to: bidContractAddress, data: globaldataDetails}, function(err,res){
+                     if(!err) {
+                       var res = res.replace(/^0x/, '');
+                       //console.log("Res : "+res);
+                       var new_res = res.match(/.{1,64}/g);
+                       if(web3_inter.eth.accounts[0] == "0x"+new_res[6].replace(/^(0+)/, '')) {
+                         console.log(new_res);
+                         var new_row = document.createElement('tr');
+                         new_row.insertCell(0).innerHTML = web3_inter.toAscii(new_res[0]);
+                         //new_row.insertCell(1).innerHTML = new_res[1].replace(/^(0+)/, '');
+                         //var date = new Date(parseInt("0x"+new_res[4])*1000);
+                         //new_row.insertCell(2).innerHTML = new_res[2];
+                         new_row.insertCell(1).innerHTML = web3_inter.toAscii(new_res[3]);
+                         new_row.insertCell(2).innerHTML = parseInt("0x"+new_res[4]);
+                         new_row.insertCell(3).innerHTML = (new Date(parseInt("0x"+new_res[5])*1000)).toLocaleString();
+                         new_row.insertCell(4).innerHTML = new_res[7].replace(/^(0+)/, '');
+                         new_row.insertCell(5).innerHTML = new_res[8]?"Yes":"No";
+
+                         document.getElementById("CloseBiddingdataTable").appendChild(new_row);
+                       }
+                     }
+                     else
+                       console.log(err);
+                   });
+                 }
+               }
+               else console.log(err);
+             });
+
+          }
+        </script>
+      </table>
+      <br /><hr />
+      <input type="text" id="close-id" placeholder="Enter Data Id"></input>
+      &nbsp
+      <button class="extra_buttons" id="close-bid"> Close Bid </button>
+
+      </fieldset><br />
+
+      <fieldset style="border:3px solid; color:black; background-color:white">
+        <legend style="color:white; background-color:orange"> Data Procured </legend>
+        <table style="border: 1px solid white;text-align:center;" id = "ProcuredDataTable">
+        <tr><th>Data_ID</th><th>Sensor</th><th>Bid</th><th>Date Captured</th><th>FarmManager</th></tr><tr></tr>
+        <script>
+        {
+           let countdata = bidContract.countData.getData(web3_inter.eth.accounts[0]);
+           web3_inter.eth.call({to: bidContractAddress, data: countdata},function(err,res){
+             if(!err) {
+               let countn = res;
+               //console.log(countn);
+               for(let i=0;i<countn;i++){
+                 //console.log("Count: " +i);
+                 let globaldataDetails = bidContract.getDataDetails.getData(web3_inter.eth.accounts[0],i);
+                 web3_inter.eth.call({to: bidContractAddress, data: globaldataDetails}, function(err,res){
+                   if(!err) {
+                     var res = res.replace(/^0x/, '');
+                     //console.log("Res : "+res);
+                     var new_res = res.match(/.{1,64}/g);
+                     //console.log(web3_inter.eth.accounts[0] + "  0x"+new_res[6].replace(/^(0+)/, ''));
+                     if(web3_inter.eth.accounts[0] != "0x"+new_res[6].replace(/^(0+)/, '')) {
+                         console.log(new_res);
+                         var new_row = document.createElement('tr');
+                         new_row.insertCell(0).innerHTML = web3_inter.toAscii(new_res[0]);
+                         new_row.insertCell(1).innerHTML = new_res[1].replace(/^(0+)/, '');
+                         //var date = new Date(parseInt("0x"+new_res[4])*1000);
+                         //new_row.insertCell(2).innerHTML = new_res[2];
+                         //new_row.insertCell(2).innerHTML = web3_intra.toAscii(new_res[3]);
+                         new_row.insertCell(2).innerHTML = parseInt("0x"+new_res[4]);
+                         new_row.insertCell(3).innerHTML = (new Date(parseInt("0x"+new_res[5])*1000)).toLocaleString();
+                         new_row.insertCell(4).innerHTML = new_res[6].replace(/^(0+)/, '');
+                         //new_row.insertCell(6).innerHTML = new_res[6].replace(/^(0+)/, '');
+
+                         document.getElementById("ProcuredDataTable").appendChild(new_row);
+                       }
+                   }
+                   else
+                     console.log(err);
+                 });
+               }  //for loop
+             }
+             else console.log(err);
+           });
+
+        }
+        </script>
+      </table>
+
+      </fieldset>
+    </div>
+
+    <div id="sensors">
+
+      <div id="wrap">
+        <h2> Sensor Node 1 </h2>
+        <br>
+        <table>
+          <tbody>
+            <tr><td>Node ID </td><td>_1</td></tr>
+            <tr><td>IP address</td><td id="ip_addr_1">192.168.0.17</td></tr>
+            <tr><td>Address </td><td id="addr1">_</td></tr>
+            <tr><td>Real Time Data </td><td id="sensor1-data"></td></tr>
+            <tr><td>Location </td><td>SaruNagar</td></tr>
+            <tr><td>Category </td><td>Pollution</td></tr>
+            <!--<tr><td colspan="2"><br><button id="bid1" >Bid</button></td></tr>-->
+          </tbody>
+        </table>
+        <div ></div>
+      </div>
+<!--
+      <div id="wrap">
+        <h2> Sensor Node 2 </h2>
+        <br>
+        <table>
+          <tbody>
+            <tr><td>Node ID </td><td>_2</td></tr>
+            <tr><td>IP address</td><td id="ip_addr_2">127.0.0.1</td></tr>
+            <tr><td>Address </td><td id="addr2">_</td></tr>
+            <tr><td>Real Time Data </td><td id="sensor2-data"></td></tr>
+            <tr><td>Location </td><td>Ghatkopar</td></tr>
+            <tr><td>Category </td><td>Pollution</td></tr>
+          </tbody>
+        </table>
+        <div ></div>
+      </div>
+-->
+    </div>
+
+    <div id="ext-sensors">
+      <br />
+      <fieldset style="border:3px solid; color:black; background-color:white">
+        <legend style="color:white; background-color:orange"> Data Available for Bidding </legend>
+        <table style="border: 1px solid white;text-align:center;" id = "BiddingdataTable">
+        <tr><th>Data_ID</th><th>Sensor</th><th>Location</th><th>Bid</th><th>Timestamp</th><th>FarmManager</th></tr><tr></tr>
+
+        <script>
+          //by farmManager 1
+          {
+             let farmManager_1 = "0x97cee678c7f468d537e261948c05821ba3608ab7";
+             let countdata = bidContract.countData.getData(farmManager_1);
+             web3_inter.eth.call({to: bidContractAddress, data: countdata},function(err,res){
+               if(!err) {
+                 let countn = res;
+                 //console.log(countn);
+                 for(let i=0;i<countn;i++){
+                   //console.log("Count: " +i);
+                   let globaldataDetails = bidContract.getDataDetails.getData(farmManager_1,i);
+                   web3_inter.eth.call({to: bidContractAddress, data: globaldataDetails}, function(err,res){
+                     if(!err) {
+                       var res = res.replace(/^0x/, '');
+                       //console.log("Res : "+res);
+                       var new_res = res.match(/.{1,64}/g);
+                       if(farmManager_1 == "0x"+new_res[6].replace(/^(0+)/, '') /*&& bid is not closed*/) {
+                         console.log(new_res);
+                         var new_row = document.createElement('tr');
+                         new_row.insertCell(0).innerHTML = web3_inter.toAscii(new_res[0]);
+                         new_row.insertCell(1).innerHTML = new_res[1].replace(/^(0+)/, '');
+                         //var date = new Date(parseInt("0x"+new_res[4])*1000);
+                         //new_row.insertCell(2).innerHTML = new_res[2];
+                         new_row.insertCell(2).innerHTML = web3_inter.toAscii(new_res[3]);
+                         new_row.insertCell(3).innerHTML = parseInt("0x"+new_res[4]);
+                         new_row.insertCell(4).innerHTML = (new Date(parseInt("0x"+new_res[5])*1000)).toLocaleString();
+                         new_row.insertCell(5).innerHTML = new_res[6].replace(/^(0+)/, '');
+
+                         document.getElementById("BiddingdataTable").appendChild(new_row);
+                       }
+                     }
+                     else
+                       console.log(err);
+                   });
+                 }
+               }
+               else console.log(err);
+             });
+          }
+          //by farmManager 2
+          {
+            let farmManager_2 = "0x3aae5f5df74630d2b0d47224d6d74c5116cb9fdb";
+            let countdata = bidContract.countData.getData(farmManager_2);
+            web3_inter.eth.call({to: bidContractAddress, data: countdata},function(err,res){
+              if(!err) {
+                let countn = res;
+                //console.log(countn);
+                for(let i=0;i<countn;i++){
+                  //console.log("FM 3 Count: " +i);
+                  let globaldataDetails = bidContract.getDataDetails.getData(farmManager_2,i);
+                  web3_inter.eth.call({to: bidContractAddress, data: globaldataDetails}, function(err,res){
+                    if(!err) {
+                      var res = res.replace(/^0x/, '');
+                      //console.log("FM 3 Res : "+res);
+                      var new_res = res.match(/.{1,64}/g);
+                      if(farmManager_2 == "0x"+new_res[6].replace(/^(0+)/, '')) {  //if data belongs to his farm
+                        console.log(new_res);
+                        var new_row = document.createElement('tr');
+                        new_row.insertCell(0).innerHTML = web3_inter.toAscii(new_res[0]);
+                        new_row.insertCell(1).innerHTML = new_res[1].replace(/^(0+)/, '');
+                        //var date = new Date(parseInt("0x"+new_res[4])*1000);
+                        //new_row.insertCell(2).innerHTML = new_res[2];
+                        new_row.insertCell(2).innerHTML = web3_inter.toAscii(new_res[3]);
+                        new_row.insertCell(3).innerHTML = parseInt("0x"+new_res[4]);
+                        new_row.insertCell(4).innerHTML = (new Date(parseInt("0x"+new_res[5])*1000)).toLocaleString();
+                        new_row.insertCell(5).innerHTML = new_res[6].replace(/^(0+)/, '');
+
+                        document.getElementById("BiddingdataTable").appendChild(new_row);
+                      }
+                    }
+                    else
+                      console.log(err);
+                  });
+                }
+              }
+              else console.log(err);
+            });
+          }
+          //by farmManager 3
+          {
+             let farmManager_3 = "0xf93e5de22cc6f9f7efac024ff6756911172eaf52";
+             let countdata = bidContract.countData.getData(farmManager_3);
+             web3_inter.eth.call({to: bidContractAddress, data: countdata},function(err,res){
+               if(!err) {
+                 let countn = res;
+                 //console.log(countn);
+                 for(let i=0;i<countn;i++){
+                   //console.log("FM 3 Count: " +i);
+                   let globaldataDetails = bidContract.getDataDetails.getData(farmManager_3,i);
+                   web3_inter.eth.call({to: bidContractAddress, data: globaldataDetails}, function(err,res){
+                     if(!err) {
+                       var res = res.replace(/^0x/, '');
+                       //console.log("FM 3 Res : "+res);
+                       var new_res = res.match(/.{1,64}/g);
+                       if(farmManager_3 == "0x"+new_res[6].replace(/^(0+)/, '')) {  //if data belongs to his farm
+                         console.log(new_res);
+                         var new_row = document.createElement('tr');
+                         new_row.insertCell(0).innerHTML = web3_inter.toAscii(new_res[0]);
+                         new_row.insertCell(1).innerHTML = new_res[1].replace(/^(0+)/, '');
+                         //var date = new Date(parseInt("0x"+new_res[4])*1000);
+                         //new_row.insertCell(2).innerHTML = new_res[2];
+                         new_row.insertCell(2).innerHTML = web3_inter.toAscii(new_res[3]);
+                         new_row.insertCell(3).innerHTML = parseInt("0x"+new_res[4]);
+                         new_row.insertCell(4).innerHTML = (new Date(parseInt("0x"+new_res[5])*1000)).toLocaleString();
+                         new_row.insertCell(5).innerHTML = new_res[6].replace(/^(0+)/, '');
+
+                         document.getElementById("BiddingdataTable").appendChild(new_row);
+                       }
+                     }
+                     else
+                       console.log(err);
+                   });
+                 }
+               }
+               else console.log(err);
+             });
+          }
+
+        </script>
+      </table>
+      <br /><hr />
+      <input type="text" id="bid-id" placeholder="Enter Data Id"></input>
+      <input type="text" id="bid-amount" placeholder="Amount "></input>
+      &nbsp
+      <button class="extra_buttons" id="bid-on-this"> Bid </button>
+
+      </fieldset><br />
+
+    </div>
+
+    <br style="clear:both;">
+    <hr>
+    &copy; 2017
+
+    <!-- The Modal -->
+    <div id="myModal" class="modal">
+      <!-- Modal content -->
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3> Confirm bid !</h3>
+        <form>
+          <table>
+            <tr><td>Data ID</td><td id="d_id">_</td></tr>
+            <tr><td>From </td><td id="from_addr">_</td></tr>
+            <tr><td>To </td><td id="to_addr">_</td></tr>
+            <tr><td>Current Highest Bid</td><td id="top_bid">_</td></tr>
+            <tr><td>Your Bid </td><td id="your_bid"></td></tr>
+            <tr>
+              <td>Acc PassWord</td><td><input id="pass" type="password" placeholder="PassPhrase"></td>
+            </tr>
+            <tr><td colspan="2"><br><button id="ubid" onclick="bidTrans();return false;">Confirm Bid</button></td></tr>
+          </table>
+        </form>
+      </div>
+    </div>
+
+    <script>
+        //updating document elements
+        document.getElementById("myaddr").innerHTML = web3_inter.eth.accounts[0];
+        document.getElementById("mybal").innerHTML = web3_inter.fromWei(web3_inter.eth.getBalance(web3_inter.eth.coinbase))+" ethers";
+
+        document.getElementById("addr1").innerHTML = web3_1.eth.accounts[0];
+        //document.getElementById("addr2").innerHTML = web3_2.eth.accounts[0];
+
+
+        // Working on modal (bidding form)
+        var modal = document.getElementById('myModal');
+        var span = document.getElementsByClassName("close")[0];
+
+
+        //transferring data from intra farm to inter farm
+        document.getElementById("transfer-data").onclick = function(){
+            var sensor_address;
+            var data_id = String(document.getElementById("transfer-id").value);
+
+            if(data_id){
+              if(data_id.charAt(4) == '1'){
+                sensor_address = web3_1.eth.accounts[0];
+                console.log("Sensor 1 selected",);
+              }
+              //else if(data_id.charAt(4) == '2'){
+              //  sensor_address = web3_2.eth.accounts[0];
+              //  console.log("Sensor 2 selected")
+              //}
+              else {
+                alert("Data ID Entered is Incorrect");
+                return;
+              }
+
+              //Mark the data as traded to ouside farm
+              var putOutToSell = farmContract.putOutToSell.getData(sensor_address,data_id);
+              web3_intra.personal.unlockAccount(web3_intra.eth.accounts[0], "test");
+              web3_intra.eth.sendTransaction({from:web3_intra.eth.accounts[0], to:farmContractAddress, data: putOutToSell, gas: 50000}, function(err,res){
+                if(!err){
+                  //alert("Transaction ID "+res);
+                  console.log("Transaction ID putOutToSell : "+res);
+                }
+                else{
+                  console.log("Error putOutToSell "+err);
+                }
+              });
+
+              //Retrieve details from Local chain
+              var dataDetails = farmContract.getSensorDataInfoById.getData(sensor_address,data_id);
+              web3_intra.eth.call({to: farmContractAddress, data: dataDetails},function(err,res){
+                if(!err) {
+                  var res = res.replace(/^0x/, '');
+                  var new_res = res.match(/.{1,64}/g);
+                  console.log(new_res);
+                  /*
+                  res[0] : data_id
+                  res[1] : dataPoints
+                  res[2] : dataHash
+                  res[3] : timestamp
+                  res[4] : location
+                  res[5] : value
+                  res[6] : tradedOutside
+                  */
+                  //Publish details on global chain
+                  var addNewData = bidContract.addNewData.getData(data_id,  //bytes32 data_id
+                    sensor_address,                             // address sensor_addr
+                    web3_inter.toDecimal("0x"+new_res[1]),     // uint dataPoints
+                    ("0x"+new_res[2]),                         // bytes32 dataHash
+                    parseInt("0x"+new_res[3]),                 // uint timestamp
+                    String(web3_inter.toAscii(new_res[4]))     // bytes32 location
+                  );
+                  web3_inter.personal.unlockAccount(web3_inter.eth.accounts[0], "test");
+                  web3_inter.eth.sendTransaction({from:web3_inter.eth.accounts[0],to:bidContractAddress, data: addNewData, gas: 500000}, function(err,res){
+                    if(!err){
+                      alert("Transaction Initiated " + res);
+                      console.log("Transaction ID addNewData : "+res);
+                    }
+                    else{
+                      console.log("Error addNewData "+err);
+                    }
+                  });
+                }
+                else {
+                    console.log("Error Retrieving DataDetails : " + err);
+                }
+              });
+            }
+            else {
+              alert("Data ID cannot be Empty");
+              return;
+            }
+        }
+
+        document.getElementById("close-bid").onclick = function(){
+            var d_id = String(document.getElementById("close-id").value);
+            var closebid = bidContract.closeBid.getData(String(d_id));
+
+            if(d_id){
+              web3_inter.personal.unlockAccount(web3_inter.eth.accounts[0],"test");
+              web3_inter.eth.sendTransaction({to:bidContractAddress, from: web3_inter.eth.accounts[0], data: closebid, gas: 300000 },function(err,res){
+                if(!err){
+                    alert("Close Bid Transaction ID is "+res);
+                }
+                else{
+                    console.log("Error Closing Bid : " + err);
+                }
+              });
+            }
+            else {
+              alert("Data ID cannot be Empty");
+            }
+        }
+
+        document.getElementById("bid-on-this").onclick = function(){
+          var bid_on = String(document.getElementById("bid-id").value);
+          var amount = Number(document.getElementById("bid-amount").value);
+
+          console.log(bid_on+" "+amount);
+
+          if(bid_on && amount) {
+            web3_inter.eth.call({to: bidContractAddress, data: bidContract.getDataDetailsById.getData(bid_on)}, function(err,res){
+              if(!err){
+                var res = res.replace(/^0x/, '');
+                var new_res = res.match(/.{1,64}/g);
+                modal.style.display = "block";
+                document.getElementById("d_id").innerHTML = bid_on;
+                //(Math.floor(Date.now() / 1000)+(b1*60) - (localStorage.getItem('dataset1')).length);
+                document.getElementById("from_addr").innerHTML = web3_inter.eth.accounts[0];
+                document.getElementById("to_addr").innerHTML = new_res[6].replace(/^(0+)/, '');
+                document.getElementById("top_bid").innerHTML = web3_inter.toDecimal("0x"+new_res[4]);
+                document.getElementById("your_bid").innerHTML = amount;
+              }
+              else{
+                console.log("Error retrieving data by ID : " + err);
+                alert(err);
+              }
+            });
+          }
+          else {
+            alert("Fields cannot be Empty");
+          }
+        }
+
+        //document.getElementById("ubid").onclick =
+        function bidTrans(){
+          var bid_on = String(document.getElementById("bid-id").value);
+          var bid_amt = Number(document.getElementById("bid-amount").value);
+          var pass = String(document.getElementById("pass").value);
+
+          web3_inter.personal.unlockAccount(web3_inter.eth.accounts[0],pass);
+          web3_inter.eth.sendTransaction({to:bidContractAddress, from: web3_inter.eth.accounts[0], data: bidContract.bid.getData(bid_on), value:bid_amt, gas:200000 },function(err,res){
+            if(!err){
+              alert("Bidding Transaction ID "+res);
+              console.log("Bidding Transaction ID : "+res);
+            }
+            else{
+              console.log("Bidding Error : " + err);
+            }
+          });
+        }
+
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        //Ownership Query
+        document.getElementById("whoowns").onclick = function(){
+          var which = String(document.getElementById("which").value);
+          if(which){
+            whoowns = bidContract.whoOwns.getData(which);
+            web3_inter.eth.call({to: bidContractAddress,data: whoowns},function(err,res){
+              if(!err){
+                 alert("'" + which + "' is owned by FarmManager " + "'0x"+res.replace(/^(0x0+)/, '')+"'");
+                 console.log(whoowns);
+              }
+              else {
+                console.log(err);
+              }
+            });
+          }
+          else {
+            alert("Data ID Cannot be Empty");
+            return;
+          }
+        }
+    </script>
+
+  </body>
+</html>

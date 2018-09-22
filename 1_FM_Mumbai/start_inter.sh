@@ -1,0 +1,1 @@
+geth --identity "fm_mumbai" --datadir InterFarm --networkid 1001 --nodiscover --rpc --rpcport 9091 --rpccorsdomain "*" --rpcapi "eth,web3,personal,admin,miner" --port 30901 --ipcpath InterFarm/geth/geth.ipc

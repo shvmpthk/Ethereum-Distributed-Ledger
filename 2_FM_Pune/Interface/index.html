@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- <link rel="shortcut icon" href="your_image_path_and_name.ico" /> -->
+    <title>Main</title>
+    <script src="web3.min.js"></script>
+    <style>
+      html,body{
+        background-image: url(iot-control-blog.jpg);
+        background-size: cover;
+        color: white;
+        height: 100%;
+        margin: 0;
+      }
+      .content{
+        position: absolute;
+        margin: 0;
+        width: 100%;
+        min-height: 100%;
+        background-color: rgba(0,0,0,0.6);
+        text-align: center;
+      }
+      h1{
+        font-size: 400%;
+        width: 70%;
+        margin: 0 auto;
+        text-align: center;
+        padding: 50px;
+      }
+      #login{
+        float: right;
+        display: inline-block;
+        padding: 10px;
+        background-color: #1abc9c;
+        border: none;
+        color: white;
+        font-size: 20px;
+        margin: 20px;
+        width: 74%;
+        height: 50px;
+      }
+      #login:hover{
+        cursor: pointer;
+        background-color: #16a085;
+        border: 1px solid #16a085;
+      }
+      table{
+        margin: 0 auto;
+        font-size: 20px;
+      }
+      td{
+        padding: 10px;
+      }
+      input[type="text"]{
+        background-color: #bdc3c7;
+        width: 100%;
+        padding: 12px 20px;
+        margin: 8px 0;
+        box-sizing: border-box;
+        border: none;
+      }
+      input[type=text]:focus {
+          border: 2px solid #16a085;
+      }
+      </style>
+  </head>
+  <body>
+    <div class="content">
+      <br><h1>Sensor Data Authentication Using Blockchains</h1>
+      <br><br><br>
+      <table>
+        <!-- <tr> -->
+          <!-- <td style="padding-right:20px;">Public Key </td><td><input id="acc" type="text" placeholder="0xabcd..." size="42"></input></td> -->
+        <!-- </tr><tr> -->
+          <!-- <td style="padding-right:20px;">Host </td><td><input id="host" type="text" placeholder="localhost:8040" size="4"></input></td> -->
+        <!-- </tr> -->
+        <tr>
+          <td>Host</td>
+          <td><input id="host" type="text" placeholder="192.168.0.1" size="10"></input></td>
+          <td>Port</td>
+          <td><input id="port" type="text" placeholder="8040" size="4"></input></td>
+        </tr>
+        <tr>
+          <td colspan="4" style="text-align:center; ">
+            <button type="button" id="login" >Enter into the Data Factory</button>
+          </td>
+        </tr>
+      </table>
+
+    </div>
+
+    <script>
+        document.getElementById("login").onclick = function(){
+          localStorage.setItem('host',document.getElementById("host").value);
+          localStorage.setItem('port',document.getElementById("port").value);
+          location.href = "new_home.html";
+        }
+    </script>
+
+  </body>
+</html>

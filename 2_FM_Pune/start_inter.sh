@@ -1,0 +1,1 @@
+geth --identity "fm_pune" --datadir InterFarm --networkid 1001 --nodiscover --rpc --rpcport 9092 --rpccorsdomain "*" --rpcapi "eth,web3,personal,admin,miner" --port 30902 --ipcpath InterFarm/geth/geth.ipc
