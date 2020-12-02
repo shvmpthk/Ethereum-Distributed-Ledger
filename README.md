@@ -86,7 +86,7 @@ Copy enode address and IP address in this file. This will be placed in blockchai
     geth --identity "node1" --datadir DataBC --networkid 101 --nodiscover --rpc --rpcport 8042 --rpccorsdomain "*" --rpcapi "eth,web3,personal,admin,miner" --port 30402 --ipcpath DataBC/geth/geth.ipc
 
 This way each individual node is started with same network ID and different ports (if simulated on same machine) or same ports if different machines.
-Query net.peercount on geth terminal on the node to get the number of connected peers.
+Query net.peercount on geth terminal on any node to get the number of connected peers in any blockchain.
 
 ### Executing the DApp
 
@@ -99,11 +99,11 @@ The System Architecture (Names used are for demonstration purpose only)
 ![](/screenshots/architecture.PNG)
 
 So the farm manager is a part of Local as well as the Global Blockchain.
-Geth node port number, network Id and the RPC port number are the parameters used by web3js for interacting with each individual geth noe.
+Geth node port number, network Id and the RPC port number are the parameters used by web3js for interacting with each individual geth node.
 
-The above shown is the architecture which we are following, considering 3 farm managers and 5 sensor nodes. Each Farm Manager has 2 addresses, one global and other local address as they are part of both global as well as local blockchain network.
+The above shown is the architecture which we are following, considering 3 farm managers and 5 sensor nodes. Each Farm Manager has 2 addresses, one global and another local address as they are part of both global as well as the local blockchain network.
 
-When the nodes are successfully running we need to deploy the smart contracts and then interact with the smart contract from geth javascript console to populate data into the blockchain from the sensor nodes so that the farm managers can then do transactions of those data in exchange of ethers in a bidding manner.
+When the nodes are successfully running we need to deploy the smart contracts and then interact with the smart contract from geth javascript console to populate data into the blockchain from the sensor nodes so that the farm managers can then do transactions of those data in exchange of ethers in a bidding fashion.
 The dapp must be running as shown in the video linked above and UI snapshots of project available in the screenshot folder.
 
 #### Smart Contracts
@@ -112,4 +112,4 @@ There are 2 smart contracts written for this project. Both available in the cont
 
 ### Acknowledgement
 
-This project was created with the help of my friend Kshitiz Srivastava who helped me to setup & configure Raspberry Pi(s) and assisted in network configuration. It was done under the guidance of Prof. Ashwini Dalvi as well as Prof. Irfan Siddavatam of K. J. Somaiya College of Engineering, Mumbai.
+This project was created with the support of my friend Kshitiz Srivastava who helped me to setup & configure Raspberry Pi(s) and assisted in network configuration. It was done under the guidance of Prof. Ashwini Dalvi as well as Prof. Irfan Siddavatam of K. J. Somaiya College of Engineering, Mumbai.
